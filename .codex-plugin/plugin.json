@@ -1,11 +1,11 @@
 {
-  "name": "claude-bingo",
-  "version": "0.2.1",
+  "name": "llm-bingo",
+  "version": "0.3.0",
   "description": "Generate a bingo board of LLM verbal tics and score it against local Claude Code transcripts.",
   "author": {
     "name": "Marc Lavallee"
   },
-  "repository": "https://github.com/lavallee/claude-bingo",
+  "repository": "https://github.com/lavallee/llm-bingo",
   "license": "MIT",
   "keywords": [
     "claude",
@@ -16,7 +16,7 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Claude Bingo",
+    "displayName": "LLM Bingo",
     "shortDescription": "Bingo for verbal tics in Claude transcripts",
     "longDescription": "Generate a local bingo board of familiar LLM phrases and score it against the user's own Claude Code transcript history without uploading anything.",
     "developerName": "Marc Lavallee",
@@ -25,10 +25,10 @@
       "Interactive",
       "Read"
     ],
-    "websiteURL": "https://github.com/lavallee/claude-bingo",
+    "websiteURL": "https://github.com/lavallee/llm-bingo",
     "defaultPrompt": [
-      "Make me a fresh Claude Bingo board.",
-      "Score my Claude Bingo board for the last seven days.",
+      "Make me a fresh LLM Bingo board.",
+      "Score my LLM Bingo board for the last seven days.",
       "Show me the worst verbal tics in my Claude transcripts."
     ]
   }

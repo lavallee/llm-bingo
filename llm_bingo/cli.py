@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""claude-bingo — a board of LLM-isms, scored against your own transcripts.
+"""llm-bingo — a board of LLM-isms, scored against your own transcripts.
 
-    claude-bingo board                 generate a fresh 5x5 board
-    claude-bingo score                 score it against the last 7 days of logs
-    claude-bingo score --days 30       ...or however far back you dare look
-    claude-bingo phrases               list the phrase bank
+    llm-bingo board                 generate a fresh 5x5 board
+    llm-bingo score                 score it against the last 7 days of logs
+    llm-bingo score --days 30       ...or however far back you dare look
+    llm-bingo phrases               list the phrase bank
 
 Everything runs locally. Transcripts are read, never sent anywhere.
 """
@@ -53,7 +53,14 @@ def bank():
 def board_path():
     base = os.environ.get("XDG_DATA_HOME")
     root = Path(base) if base else Path.home() / ".local" / "share"
-    return root / "claude-bingo" / "board.json"
+    return root / "llm-bingo" / "board.json"
+
+
+def saved_board_path():
+    """Where to read the last board: ours, else one saved before the rename."""
+    path = board_path()
+    legacy = path.parent.parent / phrases.LEGACY_NAME / "board.json"
+    return legacy if not path.exists() and legacy.exists() else path
 
 
 def color(s, c):
@@ -147,7 +154,7 @@ def _snippet(text, pat, width=64):
 def scan(days, wanted, jobs):
     if not LOG_ROOT.exists():
         sys.exit(f"no transcripts found — {LOG_ROOT} doesn't exist.\n"
-                 "claude-bingo scores your local Claude Code logs; you need "
+                 "llm-bingo scores your local Claude Code logs; you need "
                  "some history first.")
     cutoff_iso = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
     files = list(recent_logs(days))
@@ -269,14 +276,14 @@ def cmd_board(args):
     print(render(board))
     print()
     print(color(f"  board #{seed}", DIM) + color(f"  →  {path}", DIM))
-    print(color("  score it:  claude-bingo score", DIM))
+    print(color("  score it:  llm-bingo score", DIM))
     print()
 
 
 def cmd_score(args):
-    path = board_path()
+    path = saved_board_path()
     if not path.exists():
-        sys.exit("no board yet — run:  claude-bingo board")
+        sys.exit("no board yet — run:  llm-bingo board")
     board = json.loads(path.read_text())
     wanted = [c for c in board["cells"] if c != FREE]
 
@@ -327,7 +334,7 @@ def cmd_phrases(args):
         wanted = {c.lower() for c in args.category}
         by_category = {k: v for k, v in by_category.items() if k.lower() in wanted}
         if not by_category:
-            sys.exit("no such category. try:  claude-bingo phrases")
+            sys.exit("no such category. try:  llm-bingo phrases")
 
     print()
     for category, labels in by_category.items():
@@ -342,7 +349,7 @@ def cmd_phrases(args):
 
 def main():
     p = argparse.ArgumentParser(
-        prog="claude-bingo",
+        prog="llm-bingo",
         description="Bingo for LLM-isms, scored against your Claude transcripts. "
                     "Reads local logs only; nothing is uploaded.")
     sub = p.add_subparsers(dest="cmd", required=True)

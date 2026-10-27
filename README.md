@@ -1,7 +1,11 @@
-# claude-bingo
+# llm-bingo
 
 A 5×5 bingo board of LLM verbal tics, scored against your own Claude Code
 transcripts.
+
+Formerly `claude-bingo` — renamed in 0.3.0 because Claude Code reserves plugin
+names that start with `claude-`. See the [changelog](CHANGELOG.md) for moving an
+existing install.
 
 ```
          B               I               N               G               O
@@ -51,8 +55,8 @@ same code.
 ### Try it without installing anything
 
 ```bash
-uvx claude-bingo board
-uvx claude-bingo score
+uvx llm-bingo board
+uvx llm-bingo score
 ```
 
 ### As an agent plugin
@@ -65,28 +69,28 @@ sibling plugins:
 ```text
 # Claude Code
 /plugin marketplace add lyra-forge/marketplace
-/plugin install claude-bingo@lyra-forge
+/plugin install llm-bingo@lyra-forge
 
 # Codex
 codex plugin marketplace add lyra-forge/marketplace
-codex plugin add claude-bingo@lyra-forge
+codex plugin add llm-bingo@lyra-forge
 ```
 
 **Or straight from this repository**, which ships its own one-entry catalog:
 
 ```text
 # Claude Code
-/plugin marketplace add lavallee/claude-bingo
-/plugin install claude-bingo@claude-bingo
+/plugin marketplace add lavallee/llm-bingo
+/plugin install llm-bingo@llm-bingo
 
 # Codex
-codex plugin marketplace add lavallee/claude-bingo
-codex plugin add claude-bingo@claude-bingo
+codex plugin marketplace add lavallee/llm-bingo
+codex plugin add llm-bingo@llm-bingo
 ```
 
 Start a new session afterwards. Then ask for a bingo board in plain English, or
-invoke the skill directly — `/claude-bingo:bingo` in Claude Code,
-`$claude-bingo:bingo` in Codex.
+invoke the skill directly — `/llm-bingo:bingo` in Claude Code,
+`$llm-bingo:bingo` in Codex.
 
 The plugin needs no install step of its own: it runs the bundled package from
 the plugin directory using whatever `python3` you already have. The Codex plugin
@@ -95,36 +99,37 @@ scores your *Claude Code* transcripts on the same machine, which is the joke.
 ### As a CLI you keep around
 
 ```bash
-pipx install claude-bingo   # or: uv tool install claude-bingo
+pipx install llm-bingo   # or: uv tool install llm-bingo
 ```
 
 ### From source
 
 ```bash
-git clone https://github.com/lavallee/claude-bingo
-cd claude-bingo
-./scripts/claude-bingo board
+git clone https://github.com/lavallee/llm-bingo
+cd llm-bingo
+./scripts/llm-bingo board
 ```
 
 Every path needs Python 3.11+ (for `tomllib`) and nothing else. Stock macOS
-ships 3.9 — if that's what you have, `uvx claude-bingo` sidesteps it entirely.
+ships 3.9 — if that's what you have, `uvx llm-bingo` sidesteps it entirely.
 
 ## Use
 
 ```bash
-claude-bingo board              # generate a fresh board
-claude-bingo board --size 3     # smaller, for a quick round
-claude-bingo board --seed 12345 # reproduce a specific board
-claude-bingo score              # score it against the last 7 days
-claude-bingo score --days 30    # ...or however far back you dare look
-claude-bingo score --no-quotes  # skip the receipts
-claude-bingo score --top 5      # a shorter walk of shame
-claude-bingo phrases            # list the phrase bank
+llm-bingo board              # generate a fresh board
+llm-bingo board --size 3     # smaller, for a quick round
+llm-bingo board --seed 12345 # reproduce a specific board
+llm-bingo score              # score it against the last 7 days
+llm-bingo score --days 30    # ...or however far back you dare look
+llm-bingo score --no-quotes  # skip the receipts
+llm-bingo score --top 5      # a shorter walk of shame
+llm-bingo phrases            # list the phrase bank
 ```
 
-The board is saved to `$XDG_DATA_HOME/claude-bingo/board.json` (default
-`~/.local/share/claude-bingo/board.json`), so `score` picks up whatever you last
-generated.
+The board is saved to `$XDG_DATA_HOME/llm-bingo/board.json` (default
+`~/.local/share/llm-bingo/board.json`), so `score` picks up whatever you last
+generated. A board saved under the old `claude-bingo/` directory is still read
+until you generate a new one; the same goes for a personal phrase bank.
 
 A given `--seed` reproduces a given board only for a given phrase bank — add
 phrases and the same seed deals a different hand.
@@ -132,7 +137,7 @@ phrases and the same seed deals a different hand.
 ## The phrase bank
 
 65 phrases across 9 categories, in
-[`claude_bingo/phrases.toml`](claude_bingo/phrases.toml). Each entry is a board
+[`llm_bingo/phrases.toml`](llm_bingo/phrases.toml). Each entry is a board
 label and the regex that hunts for it:
 
 ```toml
@@ -145,7 +150,7 @@ Patterns are matched case-insensitively and in multiline mode, so `^` anchors to
 the start of any line.
 
 Add your own without touching the package in
-`~/.config/claude-bingo/phrases.toml` — same format. A label that collides with
+`~/.config/llm-bingo/phrases.toml` — same format. A label that collides with
 a bundled one overrides its pattern.
 
 ## Contributing
@@ -157,7 +162,7 @@ or start a new one. Two things make a good entry:
 - **The regex is specific enough to mean something.** `\bjust\b` will match
   everything and tell you nothing; `you'?re absolutely right` earns its square.
 
-Run `claude-bingo phrases` to check yours loaded, and `claude-bingo score` to
+Run `llm-bingo phrases` to check yours loaded, and `llm-bingo score` to
 see whether it actually catches anything.
 
 ## Layout
@@ -165,8 +170,8 @@ see whether it actually catches anything.
 The repository is one Python package plus the manifests each harness looks for:
 
 ```
-claude_bingo/                    the package — CLI, phrase loader, phrases.toml
-scripts/claude-bingo             launcher the plugin runs; no install needed
+llm_bingo/                       the package — CLI, phrase loader, phrases.toml
+scripts/llm-bingo                launcher the plugin runs; no install needed
 skills/bingo/SKILL.md            the skill both harnesses load
 .claude-plugin/plugin.json       Claude Code plugin manifest
 .claude-plugin/marketplace.json  this repo as a one-entry Claude Code catalog
@@ -177,7 +182,7 @@ skills/bingo/SKILL.md            the skill both harnesses load
 ## Releasing
 
 The version lives in four places — `pyproject.toml`,
-`claude_bingo/__init__.py`, and both `plugin.json` files. `tests/` fails if they
+`llm_bingo/__init__.py`, and both `plugin.json` files. `tests/` fails if they
 drift, so bump them together, then:
 
 ```bash

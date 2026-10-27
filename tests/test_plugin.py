@@ -15,7 +15,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-LAUNCHER = ROOT / "scripts" / "claude-bingo"
+LAUNCHER = ROOT / "scripts" / "llm-bingo"
 SKILL = ROOT / "skills" / "bingo" / "SKILL.md"
 
 
@@ -31,17 +31,34 @@ class VersionLockstepTests(unittest.TestCase):
         codex = read_json(".codex-plugin", "plugin.json")
 
         dunder = {}
-        exec((ROOT / "claude_bingo" / "__init__.py").read_text("utf-8"), dunder)
+        exec((ROOT / "llm_bingo" / "__init__.py").read_text("utf-8"), dunder)
 
         self.assertEqual(claude["version"], package, ".claude-plugin/plugin.json")
         self.assertEqual(codex["version"], package, ".codex-plugin/plugin.json")
-        self.assertEqual(dunder["__version__"], package, "claude_bingo.__version__")
+        self.assertEqual(dunder["__version__"], package, "llm_bingo.__version__")
 
     def test_plugin_name_is_the_same_in_both_harnesses(self):
         self.assertEqual(
             read_json(".codex-plugin", "plugin.json")["name"],
             read_json(".claude-plugin", "plugin.json")["name"],
         )
+
+    def test_no_name_uses_the_reserved_claude_prefix(self):
+        """Claude Code reserves `claude-*`; strict validation rejects it."""
+        names = [read_json(".claude-plugin", "plugin.json")["name"],
+                 read_json(".codex-plugin", "plugin.json")["name"]]
+        for parts in ((".claude-plugin", "marketplace.json"),
+                      (".agents", "plugins", "marketplace.json")):
+            market = read_json(*parts)
+            names += [market["name"]] + [e["name"] for e in market["plugins"]]
+        for name in names:
+            self.assertFalse(name.lower().startswith("claude"), name)
+
+    def test_deprecated_console_script_alias_is_kept(self):
+        scripts = tomllib.loads(
+            (ROOT / "pyproject.toml").read_text("utf-8"))["project"]["scripts"]
+        self.assertEqual(scripts["llm-bingo"], "llm_bingo.cli:main")
+        self.assertEqual(scripts["claude-bingo"], scripts["llm-bingo"])
 
 
 class MarketplaceTests(unittest.TestCase):
@@ -50,14 +67,14 @@ class MarketplaceTests(unittest.TestCase):
     def test_claude_marketplace_entry(self):
         market = read_json(".claude-plugin", "marketplace.json")
         entry, = market["plugins"]
-        self.assertEqual(entry["name"], "claude-bingo")
+        self.assertEqual(entry["name"], "llm-bingo")
         # The manifest owns the version; a copy here silently drifts.
         self.assertNotIn("version", entry)
 
     def test_codex_marketplace_entry(self):
         market = read_json(".agents", "plugins", "marketplace.json")
         entry, = market["plugins"]
-        self.assertEqual(entry["name"], "claude-bingo")
+        self.assertEqual(entry["name"], "llm-bingo")
         # Codex requires both policy fields plus a category to list an entry.
         self.assertIn("installation", entry["policy"])
         self.assertIn("authentication", entry["policy"])
@@ -112,13 +129,13 @@ class SkillTests(unittest.TestCase):
 
     def test_skill_points_at_the_real_launcher(self):
         text = SKILL.read_text("utf-8")
-        self.assertIn("scripts/claude-bingo", text)
+        self.assertIn("scripts/llm-bingo", text)
         self.assertNotIn("/absolute/path/to", text)
 
     def test_documented_commands_are_real_subcommands(self):
         text = SKILL.read_text("utf-8") + (ROOT / "README.md").read_text("utf-8")
         for cmd in ("board", "score", "phrases"):
-            self.assertIn(f"claude-bingo {cmd}", text)
+            self.assertIn(f"llm-bingo {cmd}", text)
 
 
 
@@ -127,12 +144,12 @@ class ScoringTests(unittest.TestCase):
 
     def setUp(self):
         sys.path.insert(0, str(ROOT))
-        from claude_bingo import cli
+        from llm_bingo import cli
         self.cli = cli
 
     def test_a_rendered_board_would_have_self_scored(self):
         """Guard the premise: without the skip, playing inflates the next round."""
-        from claude_bingo import phrases
+        from llm_bingo import phrases
         board = self.cli.make_board(5, 424242)
         text = self.cli.render(board)
         bank = phrases.load()["by_label"]
@@ -147,6 +164,53 @@ class ScoringTests(unittest.TestCase):
             self.cli.BOARD_MARK,
             "I'll go ahead and delve into the load-bearing parts — happy to!",
         )
+
+
+class LegacyPathTests(unittest.TestCase):
+    """Files saved before the rename keep working until replaced."""
+
+    def run_cli(self, home, *args):
+        env = {**os.environ, "XDG_DATA_HOME": str(home / "data"),
+               "XDG_CONFIG_HOME": str(home / "config"), "HOME": str(home)}
+        return subprocess.run([sys.executable, str(LAUNCHER), *args],
+                              check=False, capture_output=True, text=True,
+                              env=env)
+
+    def test_old_board_and_phrases_are_read_new_ones_win(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            old_cfg = home / "config" / "claude-bingo"
+            old_cfg.mkdir(parents=True)
+            (old_cfg / "phrases.toml").write_text('[mine]\n"zzlegacy" = "zzlegacy"\n')
+            out = self.run_cli(home, "phrases", "--category", "mine")
+            self.assertEqual(out.returncode, 0, out.stderr)
+            self.assertIn("zzlegacy", out.stdout)
+
+            new_cfg = home / "config" / "llm-bingo"
+            new_cfg.mkdir(parents=True)
+            (new_cfg / "phrases.toml").write_text('[mine]\n"zznew" = "zznew"\n')
+            out = self.run_cli(home, "phrases", "--category", "mine")
+            self.assertIn("zznew", out.stdout)
+            self.assertNotIn("zzlegacy", out.stdout)
+
+            old_data = home / "data" / "claude-bingo"
+            old_data.mkdir(parents=True)
+            (old_data / "board.json").write_text("{}")
+            sys.path.insert(0, str(ROOT))
+            from llm_bingo import cli
+            saved = os.environ.get("XDG_DATA_HOME")
+            os.environ["XDG_DATA_HOME"] = str(home / "data")
+            try:
+                self.assertEqual(cli.saved_board_path(), old_data / "board.json")
+                cli.board_path().parent.mkdir(parents=True)
+                cli.board_path().write_text("{}")
+                self.assertEqual(cli.saved_board_path(), cli.board_path())
+            finally:
+                if saved is None:
+                    os.environ.pop("XDG_DATA_HOME")
+                else:
+                    os.environ["XDG_DATA_HOME"] = saved
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@
 # multiline mode, so ^ anchors to the start of any line.
 #
 # Table names are categories. They don't affect scoring — they're for
-# organising the bank and for `claude-bingo phrases --category`.
+# organising the bank and for `llm-bingo phrases --category`.
 #
 # PRs welcome. Add to an existing category or start a new one.
 
