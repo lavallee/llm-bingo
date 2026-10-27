@@ -1,7 +1,7 @@
 """Loads the phrase bank from TOML.
 
 The bundled bank lives next to this module. Users can add their own in
-$XDG_CONFIG_HOME/claude-bingo/phrases.toml (same format); entries there are
+$XDG_CONFIG_HOME/llm-bingo/phrases.toml (same format); entries there are
 merged in, and a duplicate label overrides the bundled pattern.
 """
 
@@ -19,7 +19,13 @@ def _config_dir():
     return Path(base) if base else Path.home() / ".config"
 
 
-USER_PHRASES = _config_dir() / "claude-bingo" / "phrases.toml"
+# Before 0.3.0 this tool was claude-bingo. A user bank left under the old name
+# is still read, until one exists under the new name.
+LEGACY_NAME = "claude-bingo"
+USER_PHRASES = _config_dir() / "llm-bingo" / "phrases.toml"
+_LEGACY_PHRASES = _config_dir() / LEGACY_NAME / "phrases.toml"
+if not USER_PHRASES.exists() and _LEGACY_PHRASES.exists():
+    USER_PHRASES = _LEGACY_PHRASES
 
 
 def _load_file(path):

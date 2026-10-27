@@ -21,7 +21,7 @@ jobs:
       - name: Phrase bank loads and every regex compiles
         run: |
           python -c "
-          from claude_bingo import phrases
+          from llm_bingo import phrases
           b = phrases.load()
           assert b['labels'], 'empty phrase bank'
           assert len(b['labels']) == len(set(b['labels'])), 'duplicate labels'
@@ -30,13 +30,13 @@ jobs:
 
       - name: Board generates and renders
         run: |
-          python -m claude_bingo board --seed 1
-          python -m claude_bingo board --size 4 --seed 2
-          python -m claude_bingo phrases > /dev/null
+          python -m llm_bingo board --seed 1
+          python -m llm_bingo board --size 4 --seed 2
+          python -m llm_bingo phrases > /dev/null
 
       - name: Score fails gracefully with no transcripts
         run: |
-          if python -m claude_bingo score > out.txt 2>&1; then
+          if python -m llm_bingo score > out.txt 2>&1; then
             echo "expected a nonzero exit with no transcripts present" >&2
             exit 1
           fi
@@ -45,8 +45,8 @@ jobs:
       - name: Plugin launcher runs the way the skill invokes it
         run: |
           cd /
-          python "$GITHUB_WORKSPACE/scripts/claude-bingo" board --seed 3
-          python "$GITHUB_WORKSPACE/scripts/claude-bingo" phrases > /dev/null
+          python "$GITHUB_WORKSPACE/scripts/llm-bingo" board --seed 3
+          python "$GITHUB_WORKSPACE/scripts/llm-bingo" phrases > /dev/null
 
       - name: Manifests, versions and skill paths agree
         run: python -m unittest discover tests
@@ -56,7 +56,8 @@ jobs:
           pip install --quiet build
           python -m build --wheel
           pip install --quiet dist/*.whl
-          claude-bingo phrases > /dev/null
+          llm-bingo phrases > /dev/null
+          claude-bingo phrases > /dev/null  # deprecated pre-0.3.0 alias
 
   old-python:
     # The one thing that actually breaks on a stock macOS python3: no tomllib.
@@ -71,7 +72,7 @@ jobs:
 
       - name: Pre-3.11 gets an explanation, not a traceback
         run: |
-          if python scripts/claude-bingo board > out.txt 2>&1; then
+          if python scripts/llm-bingo board > out.txt 2>&1; then
             echo "expected a nonzero exit on python 3.10" >&2
             exit 1
           fi

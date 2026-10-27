@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.3.0
+
+- Renamed from claude-bingo to llm-bingo (display name "LLM Bingo"). Claude
+  Code now reserves plugin names beginning with `claude-`, so
+  `claude plugin validate --strict` rejects the old name. Everything moves:
+  the PyPI distribution (`llm-bingo`), the Python package (`llm_bingo`), the
+  console script, the launcher (`scripts/llm-bingo`), the plugin and both
+  in-repo catalogs, and the repository (`lavallee/llm-bingo`; GitHub redirects
+  the old URL). The phrase bank and scoring are unchanged.
+- To reinstall the plugin, add the marketplace again and install
+  `llm-bingo@llm-bingo` (or `llm-bingo@lyra-forge`); remove the old
+  `claude-bingo` plugin. A pip/pipx/uv tool install moves with
+  `pipx install llm-bingo`; the old PyPI project stays at 0.2.1.
+- The `claude-bingo` console script is kept as a deprecated alias of
+  `llm-bingo` and will be removed in a later release.
+- Saved boards and personal phrase banks now live under `llm-bingo/` in the
+  XDG data and config directories. Files left under `claude-bingo/` are still
+  read until a new one exists, so nothing is lost on upgrade.
+
 ## 0.2.1
 
 - `score` no longer counts claude-bingo's own output. A rendered board

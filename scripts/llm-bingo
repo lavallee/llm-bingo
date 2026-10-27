@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the bundled claude_bingo package straight from a plugin checkout.
+"""Run the bundled llm_bingo package straight from a plugin checkout.
 
 No install step: the package is pure standard library. This launcher only
 exists to put the plugin root on sys.path and to fail readably when the
@@ -23,12 +23,12 @@ if sys.version_info < (3, 11):
     hint = (f"try:  {newer} {Path(__file__).resolve()} {' '.join(sys.argv[1:])}"
             if newer else
             "no python3.11+ found on PATH — the zero-install path is:  "
-            f"uvx claude-bingo {' '.join(sys.argv[1:]) or 'board'}")
-    sys.exit(f"claude-bingo needs Python 3.11+ for tomllib; this is {have}.\n{hint}")
+            f"uvx llm-bingo {' '.join(sys.argv[1:]) or 'board'}")
+    sys.exit(f"llm-bingo needs Python 3.11+ for tomllib; this is {have}.\n{hint}")
 
 sys.path.insert(0, str(ROOT))
 
-from claude_bingo.cli import main  # noqa: E402
+from llm_bingo.cli import main  # noqa: E402
 
 if __name__ == "__main__":
     main()

@@ -35,6 +35,10 @@ jobs:
   publish:
     needs: build
     runs-on: ubuntu-latest
+    # PyPI trusted publisher: project llm-bingo, repo lavallee/llm-bingo,
+    # workflow publish.yml, environment pypi. The project was renamed from
+    # claude-bingo in 0.3.0, so the owner must register a *pending* publisher
+    # for llm-bingo on PyPI before the first release, or this job fails.
     environment: pypi
     permissions:
       id-token: write  # required for trusted publishing

@@ -3,8 +3,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "claude-bingo"
-version = "0.2.1"
+name = "llm-bingo"
+version = "0.3.0"
 description = "Bingo for LLM-isms, scored against your own Claude transcripts."
 readme = "README.md"
 license = "MIT"
@@ -20,11 +20,13 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/lavallee/claude-bingo"
-Issues = "https://github.com/lavallee/claude-bingo/issues"
+Homepage = "https://github.com/lavallee/llm-bingo"
+Issues = "https://github.com/lavallee/llm-bingo/issues"
 
 [project.scripts]
-claude-bingo = "claude_bingo.cli:main"
+llm-bingo = "llm_bingo.cli:main"
+# Deprecated alias from before the 0.3.0 rename; remove in a later release.
+claude-bingo = "llm_bingo.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["claude_bingo"]
+packages = ["llm_bingo"]

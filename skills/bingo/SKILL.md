@@ -4,7 +4,7 @@ description: Play LLM-ism bingo — generate a board of Claude's verbal tics ("d
 allowed-tools: Bash(python3 ${CLAUDE_PLUGIN_ROOT}/*)
 ---
 
-# Claude Bingo
+# LLM Bingo
 
 A 5×5 board of LLM verbal tics, scored against the user's local Claude Code
 transcripts under `~/.claude/projects`.
@@ -17,30 +17,30 @@ the entire point.
 
 The tool is pure standard library, so it runs from the plugin with no install
 step. Everything goes through one launcher: this plugin's root-level
-`scripts/claude-bingo`. In Claude Code that path is
-`${CLAUDE_PLUGIN_ROOT}/scripts/claude-bingo`; in Codex, resolve it against the
+`scripts/llm-bingo`. In Claude Code that path is
+`${CLAUDE_PLUGIN_ROOT}/scripts/llm-bingo`; in Codex, resolve it against the
 plugin directory this skill was loaded from.
 
-Below, `claude-bingo` stands for `python3 <that launcher>`.
+Below, `llm-bingo` stands for `python3 <that launcher>`.
 
 ```bash
-claude-bingo board                    # a fresh board, saved for scoring
-claude-bingo board --size 3           # smaller, for a quick round
-claude-bingo board --seed 12345       # reproduce a specific board
+llm-bingo board                    # a fresh board, saved for scoring
+llm-bingo board --size 3           # smaller, for a quick round
+llm-bingo board --seed 12345       # reproduce a specific board
 
-claude-bingo score                    # score the saved board, last 7 days
-claude-bingo score --days 30          # ...or however far back they dare look
-claude-bingo score --no-quotes        # skip the receipts
-claude-bingo score --top 5            # shorter offenders list
+llm-bingo score                    # score the saved board, last 7 days
+llm-bingo score --days 30          # ...or however far back they dare look
+llm-bingo score --no-quotes        # skip the receipts
+llm-bingo score --top 5            # shorter offenders list
 
-claude-bingo phrases                  # the whole bank
-claude-bingo phrases --category linkedin-brain
+llm-bingo phrases                  # the whole bank
+llm-bingo phrases --category linkedin-brain
 ```
 
 So a real invocation in Claude Code looks like:
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/claude-bingo" board
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/llm-bingo" board
 ```
 
 If it reports that it needs Python 3.11 or newer, it will also print the exact
@@ -59,9 +59,9 @@ command to retry with. Don't try to work around it by other means.
 
 ## Adding phrases
 
-The bundled bank is TOML at `claude_bingo/phrases.toml` inside the plugin. Users
+The bundled bank is TOML at `llm_bingo/phrases.toml` inside the plugin. Users
 can add their own without touching the plugin, in
-`~/.config/claude-bingo/phrases.toml`:
+`~/.config/llm-bingo/phrases.toml`:
 
 ```toml
 [my-category]
@@ -70,7 +70,7 @@ can add their own without touching the plugin, in
 
 Patterns are matched case-insensitively and in multiline mode, so `^` anchors to
 the start of any line. A label that collides with a bundled one overrides its
-pattern. `claude-bingo phrases` prints both paths — use it to confirm a new
+pattern. `llm-bingo phrases` prints both paths — use it to confirm a new
 entry loaded.
 
 ## Privacy
